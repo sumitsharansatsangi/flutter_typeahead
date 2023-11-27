@@ -54,10 +54,9 @@ class FloaterTarget extends StatelessWidget {
 
 class _FloaterTarget extends SingleChildRenderObjectWidget {
   const _FloaterTarget({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.link,
-  }) : super(key: key, child: child);
+  });
 
   final FloaterLink link;
 
@@ -243,6 +242,7 @@ class _FloaterState extends State<Floater> with WidgetsBindingObserver {
 
   void updateOverlay() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {});
       controller.show();
     });
@@ -527,8 +527,8 @@ class FloaterData {
 class _FloaterProvider extends InheritedWidget {
   const _FloaterProvider({
     required this.data,
-    required Widget child,
-  }) : super(child: child);
+    required super.child,
+  });
 
   final FloaterData data;
 
