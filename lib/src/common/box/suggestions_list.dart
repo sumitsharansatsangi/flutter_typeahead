@@ -97,7 +97,7 @@ class SuggestionsList<T> extends StatefulWidget {
   /// See also:
   /// * [hideOnError], which is whether the suggestions box should be hidden on error.
   /// {@endtemplate}
-  final ErrorBuilder errorBuilder;
+  final SuggestionsErrorBuilder errorBuilder;
 
   /// {@template flutter_typeahead.SuggestionsList.emptyBuilder}
   /// Builds the widget for when the suggestions list is empty.
@@ -122,7 +122,7 @@ class SuggestionsList<T> extends StatefulWidget {
   /// },
   /// ```
   /// {@endtemplate}
-  final ItemBuilder<T> itemBuilder;
+  final SuggestionsItemBuilder<T> itemBuilder;
 
   /// {@template flutter_typeahead.SuggestionsList.itemSeparatorBuilder}
   /// Optional builder function to add separators between suggestions.
@@ -170,9 +170,9 @@ class _SuggestionsListState<T> extends State<SuggestionsList<T>> {
         bool retainOnLoading = widget.retainOnLoading ?? true;
 
         bool isError = widget.controller.hasError;
-        bool isEmpty = suggestions == null || suggestions.isEmpty;
-        bool isLoading =
-            widget.controller.isLoading && (isEmpty || !retainOnLoading);
+        bool isEmpty = suggestions?.isEmpty ?? false;
+        bool isLoading = widget.controller.isLoading &&
+            (suggestions == null || isEmpty || !retainOnLoading);
 
         if (isLoading) {
           if (widget.hideOnLoading ?? false) return const SizedBox();
@@ -183,6 +183,8 @@ class _SuggestionsListState<T> extends State<SuggestionsList<T>> {
         } else if (isEmpty) {
           if (widget.hideOnEmpty ?? false) return const SizedBox();
           return widget.emptyBuilder(context);
+        } else if (suggestions == null) {
+          return const SizedBox();
         }
 
         if (widget.listBuilder != null) {

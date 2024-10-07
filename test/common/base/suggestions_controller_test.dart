@@ -20,6 +20,17 @@ void main() {
       expect(controller.suggestions, equals(['a', 'b', 'c']));
     });
 
+    test('refreshes the suggestions', () async {
+      expect(controller.suggestions, isNull);
+      controller.suggestions = ['a', 'b', 'c'];
+      bool called = false;
+      controller.$refreshes.listen((_) => called = true);
+      controller.refresh();
+      await Future<void>.value();
+      expect(controller.suggestions, null);
+      expect(called, isTrue);
+    });
+
     test('sets loading state', () {
       expect(controller.isLoading, isFalse);
       controller.isLoading = true;
@@ -31,6 +42,32 @@ void main() {
       controller.error = 'error';
       expect(controller.hasError, isTrue);
       expect(controller.error, equals('error'));
+    });
+
+    test('sets highlighted index', () {
+      controller.suggestions = ['a', 'b', 'c'];
+      expect(controller.highlighted, isNull);
+      controller.highlighted = 1;
+      expect(controller.highlighted, equals(1));
+      controller.highlightNext();
+      expect(controller.highlighted, equals(2));
+      controller.highlightPrevious();
+      expect(controller.highlighted, equals(1));
+      controller.unhighlight();
+      expect(controller.highlighted, isNull);
+    });
+
+    test('sets highlighted suggestion', () {
+      controller.suggestions = ['a', 'b', 'c'];
+      expect(controller.highlightedSuggestion, isNull);
+      controller.highlightedSuggestion = 'b';
+      expect(controller.highlightedSuggestion, equals('b'));
+      controller.highlightNext();
+      expect(controller.highlightedSuggestion, equals('c'));
+      controller.highlightPrevious();
+      expect(controller.highlightedSuggestion, equals('b'));
+      controller.highlightedSuggestion = null;
+      expect(controller.highlightedSuggestion, isNull);
     });
 
     test('opens suggestions list', () {
@@ -57,19 +94,17 @@ void main() {
       expect(controller.isOpen, isFalse);
     });
 
+    test('opens suggestion list while not gaining focus', () {
+      controller.open(gainFocus: false);
+      expect(controller.isOpen, isTrue);
+      expect(controller.gainFocus, isFalse);
+    });
+
     test('closes suggestions list while retaining box focus', () {
       controller.open();
       controller.close(retainFocus: true);
       expect(controller.isOpen, isFalse);
       expect(controller.retainFocus, isTrue);
-    });
-
-    test('opens suggestions list and resets retain focus', () {
-      controller.open();
-      controller.close(retainFocus: true);
-      controller.open();
-      expect(controller.isOpen, isTrue);
-      expect(controller.retainFocus, isFalse);
     });
 
     test('dispose closes suggestions list', () async {
@@ -83,7 +118,7 @@ void main() {
 
     test('sends resize event', () async {
       bool called = false;
-      controller.resizes.listen((_) => called = true);
+      controller.$resizes.listen((_) => called = true);
       controller.resize();
       await Future<void>.value();
       expect(called, isTrue);
@@ -141,7 +176,7 @@ void main() {
       );
     });
 
-    testWidgets('can maybe be found in context', (WidgetTester tester) async {
+    testWidgets('may be found in context', (WidgetTester tester) async {
       final key = GlobalKey();
       await tester.pumpWidget(
         Container(

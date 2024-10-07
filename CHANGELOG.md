@@ -4,41 +4,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Highlighted suggestion in controller
+
+## 5.2.0 - 2024-02-08
+### Added
+- force refreshing suggestions with `SuggestionsController.refresh`
+
+### Fixed
+- suggestionsCallback getting called even when closed
+
+## 5.1.0 - 2024-01-27
+### Added
+- Returning null from `suggestionsCallback` hides the box
+- `showOnFocus` parameter for `TypeAheadField` to allow not showing the box on focus
+- `gainFocus` paramater for `SuggestionsController.open` to allow opening the box without focusing
+
+## 5.0.2 - 2024-01-11
+### Changed
+- Upgraded flutter\_keyboard\_visibility: ^5.4.1 to ^6.0.0
+- Upgraded pointer\_interceptor: ^0.9.3+6 to ^0.10.0
+
+### Fixed
+- dispose error in suggestions search
+
+## 5.0.1 - 2023-11-27
+### Fixed
+- SetState error in suggestions box
+
 ## 5.0.0 - 2023-11-25
 ### Added
-- Custom `TextField` builder via the `builder` property, replacing `TextFieldConfiguration`.
-- `decorationBuilder` property for customizing `SuggestionsBox` decoration.
-- Suggestions state (items, loading, error) in `SuggestionsController`.
-- Streams in `SuggestionsController` for notification of selected suggestions.
+- Custom `TextField` builder via the `builder` property, replacing `TextFieldConfiguration`
+- `decorationBuilder` property for customizing `SuggestionsBox` decoration
+- Suggestions state (items, loading, error) in `SuggestionsController`
+- Streams in `SuggestionsController` for notification of selected suggestions
 
 ### Changed
-- Renamed `SuggestionsBoxController` to `SuggestionsController`.
-- Renamed `layoutArchitecture` to `listBuilder`.
-- Renamed `noItemsFoundBuilder` to `emptyBuilder`.
-- Renamed `onSuggestionSelected` to `onSelected`.
-- Renamed `suggestionsBoxVerticalOffset` to `offset`, now including horizontal offset.
-- Renamed `hideSuggestionsOnKeyboardHide` to `hideWithKeyboard`.
-- Renamed `keepSuggestionsOnSuggestionSelected` to `hideOnSelect` and inverted its functionality.
-- Renamed `keepSuggestionsOnLoading` to `retainOnLoading`.
+- Renamed `SuggestionsBoxController` to `SuggestionsController`
+- Renamed `layoutArchitecture` to `listBuilder`
+- Renamed `noItemsFoundBuilder` to `emptyBuilder`
+- Renamed `onSuggestionSelected` to `onSelected`
+- Renamed `suggestionsBoxVerticalOffset` to `offset`, now including horizontal offset
+- Renamed `hideSuggestionsOnKeyboardHide` to `hideWithKeyboard`
+- Renamed `keepSuggestionsOnSuggestionSelected` to `hideOnSelect` and inverted its functionality
+- Renamed `keepSuggestionsOnLoading` to `retainOnLoading`
 
 ### Removed
-- `SuggestionsBoxDecoration`, replaced by `decorationBuilder`.
-- `TextFieldConfiguration`, replaced by custom `TextField` builder.
-- `CupertinoSuggestionsBoxController` in favor of `SuggestionsController`.
-- `TypeAheadFormFiled`, replaced by custom `TextField` builder.
-- `intercepting` parameter (now always true).
-- `onSuggestionsBoxToggle` parameter (replaced with subscriptions to `SuggestionsController`).
-- `ignoreAccessibleNavigation` parameter (no longer required with new `Overlay` code).
-- `animationStart` parameter (use animation mapping).
-- `minCharsForSuggestions` parameter (implement in client code).
-- `autoFlipListDirection` parameter (use `listBuilder`).
+- `SuggestionsBoxDecoration`, replaced by `decorationBuilder`
+- `TextFieldConfiguration`, replaced by custom `TextField` builder
+- `CupertinoSuggestionsBoxController` in favor of `SuggestionsController`
+- `TypeAheadFormFiled`, replaced by custom `TextField` builder
+- `intercepting` parameter (now always true)
+- `onSuggestionsBoxToggle` parameter (replaced with subscriptions to `SuggestionsController`)
+- `ignoreAccessibleNavigation` parameter (no longer required with new `Overlay` code)
+- `animationStart` parameter (use animation mapping)
+- `minCharsForSuggestions` parameter (implement in client code)
+- `autoFlipListDirection` parameter (use `listBuilder`)
 
 ## 4.8.0 - 2023-09-24
 ### Changed
 - General cleanup of the codebase (#523)
 
 ## 4.7.0 - 2023-09-05
-## Added
+### Added
 - `expands` property to TextFieldConfiguration (#512)
 - `scrollbarAlwaysVisible` argument (#512)
 
@@ -135,8 +164,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Warnings related to Flutter 3.0 (#95)
 
 ## 3.2.7 - 2022-05-15
-### Reverted
-- Previous fix for Flutter 3.0 warnings (#95)
+### Changed
+- Reverted previous fix for Flutter 3.0 warnings (#95)
 
 ## 3.2.6 - 2022-05-15
 ### Fixed
@@ -210,12 +239,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Null-safety pre-release (#90)
 
-## 2.0.0 - 2021-01-11
-### Breaking Changes
-- Changed Types for some calls
+## 2.1.0-nullsafety.0 - 2021-01-21
+### Changed
+- Opt into null-safety
 
+## 2.0.0 - 2021-01-11
 ### Changed
 - Re-applied changes from 1.9.2
+- Types for some calls
 
 ## 1.9.3 - 2021-01-10
 ### Changed
@@ -255,16 +286,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Updated `flutter_Keyboard_visibility` dependency to ^3.0.0
 
 ## 1.8.4 - 2020-06-30
+### Added
+- suggestions box clip parameter
+
 ### Fixed
-- Merged 3 PRs addressing various bug fixes
+- Erratic suggestions callback behaviour
+- Exception with cut/paste
 
 ## 1.8.3 - 2020-06-11
 ### Fixed
 - Addressed keyboard visibility issues (contribution from @alphamikle)
 
+## 1.8.2 - 2020-04-12
+### Fixed
+- Various issues
+
 ## 1.8.1 - 2020-04-08
 ### Fixed
-- Various bug fixes
+- Various issues
 
 ## 1.8.0 - 2020-01-23
 ### Added
@@ -276,11 +315,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Switched from List to Iterable for flexibility
 
 ### Fixed
-- Various bug fixes
+- Various issues
 
 ## 1.7.0 - 2019-10-16
-Contributions from MisterJimson, davidmartos96, pparadox11, diegoveloper
-
 ### Added
 - `enableInteractiveSelection` property
 
@@ -303,7 +340,7 @@ Contributions from MisterJimson, davidmartos96, pparadox11, diegoveloper
 - Updated example project
 
 ### Fixed
-- Various bug fixes
+- Various issues
 
 ## 1.5.0 - 2019-04-25
 ### Added
@@ -330,7 +367,7 @@ Contributions from MisterJimson, davidmartos96, pparadox11, diegoveloper
 - Optimizations
 
 ### Fixed
-- Various bug fixes
+- Various issues
 
 ## 1.2.0 - 2019-03-05
 ### Added
@@ -368,6 +405,10 @@ Contributions from MisterJimson, davidmartos96, pparadox11, diegoveloper
 ### Fixed
 - Bug in `maxHeight` property
 
+## 0.7.0 - 2019-02-07
+### Added
+- Added properties `hideOnLoading`, `hideOnEmpty`, and `hideOnError` to hide the suggestions box
+
 ## 1.0.1 - 2019-02-06
 ### Added
 - Properties `hideOnLoading`, `hideOnEmpty`, `hideOnError` to control visibility of suggestions box
@@ -392,7 +433,7 @@ Contributions from MisterJimson, davidmartos96, pparadox11, diegoveloper
 
 ## 0.5.1 - 2019-01-10
 ### Fixed
-- Various bug fixes
+- Various issues
 
 ## 0.5.0 - 2019-01-05
 ### Added

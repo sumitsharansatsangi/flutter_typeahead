@@ -5,11 +5,11 @@ import 'package:flutter_typeahead/src/common/box/suggestions_box.dart';
 import 'package:flutter_typeahead/src/common/base/suggestions_controller.dart';
 import 'package:flutter_typeahead/src/common/base/types.dart';
 import 'package:flutter_typeahead/src/common/field/suggestions_field_focus_connector.dart';
+import 'package:flutter_typeahead/src/common/field/suggestions_field_highlight_connector.dart';
 import 'package:flutter_typeahead/src/common/field/suggestions_field_keyboard_connector.dart';
 import 'package:flutter_typeahead/src/common/field/suggestions_field_box_connector.dart';
 import 'package:flutter_typeahead/src/common/field/suggestions_field_select_connector.dart';
 import 'package:flutter_typeahead/src/common/field/suggestions_field_tap_connector.dart';
-import 'package:flutter_typeahead/src/common/field/suggestions_field_traversal_connector.dart';
 
 /// A widget that displays a list of suggestions above or below another widget.
 class SuggestionsField<T> extends StatefulWidget {
@@ -23,6 +23,7 @@ class SuggestionsField<T> extends StatefulWidget {
     this.direction,
     this.autoFlipDirection = false,
     this.autoFlipMinHeight = 64,
+    this.showOnFocus = true,
     this.hideOnUnfocus = true,
     this.hideOnSelect = true,
     this.hideWithKeyboard = true,
@@ -104,6 +105,15 @@ class SuggestionsField<T> extends StatefulWidget {
   /// Defaults to 64.
   /// {@endtemplate}
   final double autoFlipMinHeight;
+
+  /// {@template flutter_typeahead.SuggestionsField.showOnFocus}
+  /// Whether the suggestions box should be shown when the child of the suggestions box gains focus.
+  ///
+  /// If disabled, the suggestions box will remain closed when the user taps on the child of the suggestions box.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool showOnFocus;
 
   /// {@template flutter_typeahead.SuggestionsField.hideOnUnfocus}
   /// Whether the suggestions box should be hidden when the child of the suggestions box loses focus.
@@ -263,16 +273,16 @@ class _SuggestionsFieldState<T> extends State<SuggestionsField<T>> {
           link: link,
           child: ConnectorWidget(
             value: controller,
-            connect: (value) => value.resizes.listen((_) => onResize()),
+            connect: (value) => value.$resizes.listen((_) => onResize()),
             disconnect: (value, key) => key?.cancel(),
             child: SuggestionsFieldFocusConnector<T>(
               controller: controller,
               focusNode: widget.focusNode,
-              child: SuggestionsFieldTraversalConnector<T>(
+              child: SuggestionsFieldHighlightConnector<T>(
                 controller: controller,
-                focusNode: widget.focusNode,
                 child: SuggestionsFieldBoxConnector<T>(
                   controller: controller,
+                  showOnFocus: widget.showOnFocus,
                   hideOnUnfocus: widget.hideOnUnfocus,
                   child: SuggestionsFieldKeyboardConnector<T>(
                     controller: controller,

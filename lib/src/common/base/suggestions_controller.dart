@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -52,6 +53,70 @@ class SuggestionsController<T> extends ChangeNotifier {
 
   List<T>? _suggestions;
 
+  /// The index of the highlighted suggestion in the suggestions box.
+  int? get highlighted => _highlighted;
+  set highlighted(int? value) {
+    if (_highlighted == value) return;
+    _highlighted = value;
+    notifyListeners();
+  }
+
+  int? _highlighted;
+
+  /// Removes the highlight from the suggestions box.
+  void unhighlight() => highlighted = null;
+
+  /// Highlights the previous suggestion in the suggestions box.
+  void highlightPrevious() {
+    if (highlighted == null) return;
+    if (highlighted! <= 0) {
+      highlighted = null;
+    } else {
+      int max = suggestions == null ? 0 : suggestions!.length - 1;
+      highlighted = min(highlighted! - 1, max);
+    }
+  }
+
+  /// Highlights the next suggestion in the suggestions box.
+  void highlightNext() {
+    if (highlighted == null) {
+      highlighted = 0;
+    } else {
+      int max = suggestions == null ? 0 : suggestions!.length - 1;
+      highlighted = min(highlighted! + 1, max);
+    }
+  }
+
+  /// The highlighted suggestion in the suggestions box.
+  ///
+  /// This is the suggestion at the index of [highlighted].
+  T? get highlightedSuggestion {
+    if (highlighted == null) return null;
+    return suggestions?.elementAtOrNull(highlighted!);
+  }
+
+  set highlightedSuggestion(T? value) {
+    if (value == null) {
+      highlighted = null;
+    } else {
+      highlighted = suggestions?.indexOf(value);
+    }
+  }
+
+  /// A stream of events that occur when the suggestions list should be refreshed.
+  ///
+  /// For internal use only.
+  Stream<void> get $refreshes => _refreshesController.stream;
+  final StreamController<void> _refreshesController =
+      StreamController<void>.broadcast();
+
+  /// Resets the suggestions so that they are requested again.
+  void refresh() {
+    ChangeNotifier.debugAssertNotDisposed(this);
+    _suggestions = null;
+    _refreshesController.add(null);
+  }
+
   /// Whether the suggestions box is loading.
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
@@ -86,6 +151,10 @@ class SuggestionsController<T> extends ChangeNotifier {
   /// Whether the suggestions field should retain the focus when its box is closed.
   bool get retainFocus => _retainFocus;
   bool _retainFocus = false;
+
+  /// Whether the suggestions box should gain the focus when it is opened.
+  bool get gainFocus => _gainFocus;
+  bool _gainFocus = true;
 
   /// The desired direction of the suggestions box.
   ///
@@ -125,9 +194,17 @@ class SuggestionsController<T> extends ChangeNotifier {
   /// A stream of events that occur when the suggestions box should be resized.
   ///
   /// For internal use only.
-  Stream<void> get resizes => _resizesController.stream;
+  Stream<void> get $resizes => _resizesController.stream;
   final StreamController<void> _resizesController =
       StreamController<void>.broadcast();
+
+  /// Resizes the suggestions box.
+  ///
+  /// You usually don't need to call this method manually.
+  void resize() {
+    ChangeNotifier.debugAssertNotDisposed(this);
+    _resizesController.add(null);
+  }
 
   /// A stream of selected suggestions.
   Stream<T> get selections => _selectionsController.stream;
@@ -138,14 +215,6 @@ class SuggestionsController<T> extends ChangeNotifier {
   ///
   /// This notifies potential listeners of the selection.
   void select(T suggestion) => _selectionsController.add(suggestion);
-
-  /// Resizes the suggestions box.
-  ///
-  /// You usually don't need to call this method manually.
-  void resize() {
-    ChangeNotifier.debugAssertNotDisposed(this);
-    _resizesController.add(null);
-  }
 
   /// Focuses the suggestions box.
   void focusBox() {
@@ -169,10 +238,10 @@ class SuggestionsController<T> extends ChangeNotifier {
   }
 
   /// Opens the suggestions box.
-  void open() {
+  void open({bool gainFocus = true}) {
     if (isOpen) return;
     _isOpen = true;
-    _retainFocus = false;
+    _gainFocus = gainFocus;
     notifyListeners();
     resize();
   }
@@ -197,7 +266,9 @@ class SuggestionsController<T> extends ChangeNotifier {
   @override
   void dispose() {
     close();
+    _refreshesController.close();
     _resizesController.close();
+    _selectionsController.close();
     super.dispose();
   }
 }
@@ -221,5 +292,8 @@ enum SuggestionsFocusState {
   box,
 
   /// The suggestions field is focused.
-  field,
+  field;
+
+  /// Whether the suggestions box or field is focused.
+  bool get hasFocus => this != SuggestionsFocusState.blur;
 }

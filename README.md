@@ -7,16 +7,13 @@
 A TypeAhead (autocomplete) widget for Flutter, where you can show suggestions to
 users as they type
 
-<img src="https://raw.githubusercontent.com/AbdulRahmanAlHamali/flutter_typeahead/master/flutter_typeahead.gif">
+<img src="https://raw.githubusercontent.com/AbdulRahmanAlHamali/flutter_typeahead/master/flutter_typeahead.gif" width="400" height="auto" alt="Flutter TypeAhead Demo" />
 
 ## Features
 
-- Shows suggestions in an overlay that floats on top of other widgets
-- Allows customizing all aspects: suggestions, loading, errors, empty, animation, decoration, layout, etc.
-- Provides an integration with [FormField](https://docs.flutter.io/flutter/widgets/FormField-class.html)
-  version that accepts validation, submitting, etc.
+- Shows suggestions in an floating box with the same width as your TextField
+- Allows controlling all aspects: suggestions, loading, errors, empty, animation, decoration, layout, etc.
 - Comes in both Material and Cupertino widget flavors
-- Exposes all state through a controller for more customization
 
 For installation, see [installation instructions](https://pub.dartlang.org/packages/flutter_typeahead/install).
 
@@ -42,8 +39,8 @@ TypeAheadField<City>(
       focusNode: focusNode,
       autofocus: true,
       decoration: InputDecoration(
-        border: OutlineInputBorder()
-        labelText: 'City'
+        border: OutlineInputBorder(),
+        labelText: 'City',
       )
     );
   },
@@ -172,6 +169,9 @@ You can do so with the following parameters:
 - `hideOnUnfocus`: Hide the suggestions box when the `TextField` loses focus. `True` by default.
 - `hideWithKeyboard`: Hide the suggestions box when the keyboard is hidden. `True` by default.
 
+You can also very generally hide the suggestions box by returning `null` from the `suggestionsCallback`.
+This is different from returning an empty list, which will show the empty widget.
+
 ### Customizing the animation
 
 Animation duration can be customized using the `animationDuration` parameter.
@@ -226,22 +226,69 @@ It grants access to the following:
 
 When building a widget inside of the suggestions box, you can access the controller via `SuggestionsController.of(context)`.
 
+### Controlling the focus
+
+Focus plays an important role in the suggestions box. It is used to determine when to show and hide the suggestions box.
+However, in certain situations you may want to control the suggestions box independently of the focus.
+
+Options to do so are as follows:
+
+On the `TypeAheadField`:
+
+- `showOnFocus` (default: `true`): Show the suggestions box when the `TextField` gains focus.
+- `hideOnUnfocus` (default: `true`): Hide the suggestions box when the `TextField` loses focus.
+
+On the `SuggestionsController`:
+
+- `open(gainFocus: false)`: Show the suggestions box without focusing it.
+- `close(retainFocus: true)`: Hide the suggestions box without unfocusing it.
+
 ### Customizing everything
 
 To create your own version of the TypeAhead widget, that is neither Material nor Cupertino, you can use the `RawTypeAheadField` widget.
 
 You must then specify the following parameters:
 
-- builder (to build the `TextField`)
-- loadingBuilder (to build the loading widget)
-- errorBuilder (to build the error widget)
-- emptyBuilder (to build the empty widget)
-- itemBuilder (to build the suggestions)
+- `builder` (to build the `TextField`)
+- `loadingBuilder` (to build the loading widget)
+- `errorBuilder` (to build the error widget)
+- `emptyBuilder` (to build the empty widget)
+- `itemBuilder` (to build the suggestions)
 
 As well as all the usual parameters, such as `suggestionsCallback`, `onSelected`, etc.
 
 The `decorationBuilder` can be used to inject required wrappers like `Material` or `DefaultTextStyle`.
 For more information, see the source code of the `TypeAheadField` widget.
+
+## FAQ
+
+### My suggestions arent changing when I type
+
+You have most likely forgotten to pass the controller and focus node to the `TextField` in the `builder` property.
+This is required for the suggestions box to function. Here is an example:
+
+```dart
+TypeAheadField(
+  // ...
+  controller: myTextEditingController, // your custom controller, or null
+  builder: (context, controller, focusNode) {
+    return TextField(
+      controller: controller, // note how the controller is passed
+      focusNode: focusNode,
+      // ...
+    );
+  },
+);
+```
+
+### My suggestions are not updating when I click on the TextField
+
+The TypeAhead field caches the suggestions to avoid unnecessary calls to the `suggestionsCallback`.
+If you want to force the suggestions to update, you can use the `SuggestionsController` to force a refresh.
+
+```dart
+mySuggestionsController.refresh();
+```
 
 ## Migrations
 
@@ -268,6 +315,7 @@ Additionally, various changes have been made to the API surface to make the pack
   - `suggestionsBoxVerticalOffset` -> `offset` (now also includes horizontal offset)
   - `hideSuggestionsOnKeyboardHide` -> `hideWithKeyboard`
   - `keepSuggestionsOnSuggestionSelected` -> `hideOnSelect` (inverted)
+  - `keepSuggestionsOnLoading`-> `retainOnLoading`
 - Some parameters have been removed:
   - `intercepting`: This is now always true, since it doesnt interfere on mobile platforms and generally has no downsides.
   - `onSuggestionsBoxToggle`: You can subscribe to the `SuggestionsController` to get notified when the suggestions box is toggled.
@@ -275,6 +323,7 @@ Additionally, various changes have been made to the API surface to make the pack
   - `minCharsForSuggestions`: You can return an empty list from `suggestionsCallback` instead.
   - `animationStart`: You can use the animation in the builder and map it to customise this.
   - `autoFlipListDirection`: This is now always true. You can use the list builder to disable this behavior.
+  - `getImmediateSuggestions`: You can use the `debounceDuration` to achieve the same effect.
 
 ### From 2.x to 3.x
 
@@ -285,13 +334,13 @@ Flutter now also features the inbuilt Autocomplete widget, which has similar beh
 
 Visit the [API Documentation](https://pub.dartlang.org/documentation/flutter_typeahead/).
 
-## Team:
+## Team
 
-| [<img src="https://avatars.githubusercontent.com/u/16646600?v=3" width="100px;"/>](https://github.com/AbdulRahmanAlHamali) | [<img src="https://avatars.githubusercontent.com/u/2034925?v=3" width="100px;"/>](https://github.com/sjmcdowall) | [<img src="https://avatars.githubusercontent.com/u/5499214?v=3" width="100px;"/>](https://github.com/KaYBlitZ) |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| AbdulRahman AlHamali                                                                                                       | S McDowall                                                                                                       | Kenneth Liang                                                                                                  |
+| [<img src="https://github.com/AbdulRahmanAlHamali.png" width="100px;"/>](https://github.com/AbdulRahmanAlHamali) | [<img src="https://github.com/sjmcdowall.png" width="100px;"/>](https://github.com/sjmcdowall) | [<img src="https://github.com/KaYBlitZ.png" width="100px;"/>](https://github.com/KaYBlitZ) | [<img src="https://github.com/clragon.png" width="100px;"/>](https://github.com/clragon) |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| AbdulRahman AlHamali                                                                                             | S McDowall                                                                                     | Kenneth Liang                                                                              | clragon                                                                                  |
 
-## Shout out to the contributors!
+## Thank you
 
 This project is the result of the collective effort of contributors who participated effectively by submitting pull requests, reporting issues, and answering questions.
 Thank you for your proactiveness, and we hope `flutter_typeahead` made your lifes at least a little easier!

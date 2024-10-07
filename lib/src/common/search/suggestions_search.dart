@@ -37,6 +37,8 @@ class SuggestionsSearch<T> extends StatefulWidget {
   /// }
   /// ```
   ///
+  /// If this returns null, the suggestions box will be invisible.
+  ///
   /// See also:
   /// * [debounceDuration], which is the duration to wait for changes in the text field before updating suggestions.
   /// {@endtemplate}
@@ -63,28 +65,34 @@ class SuggestionsSearch<T> extends StatefulWidget {
 
 class _SuggestionsSearchState<T> extends State<SuggestionsSearch<T>> {
   bool isQueued = false;
-  late String search;
-  late bool wasOpen;
+  late String search = widget.textEditingController.text;
+  late bool wasOpen = widget.controller.isOpen;
+  late bool hadSuggestions = widget.controller.suggestions != null;
 
   @override
   void initState() {
     super.initState();
-    search = widget.textEditingController.text;
-    wasOpen = widget.controller.isOpen;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (wasOpen) {
-        load();
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => load());
+  }
+
+  void onChange() {
+    if (!mounted) return;
+    onOpenChange();
+    onSuggestionsChange();
   }
 
   void onOpenChange() {
-    if (wasOpen == widget.controller.isOpen) return;
-    wasOpen = widget.controller.isOpen;
-    if (wasOpen) {
-      load();
-    }
+    bool isOpen = widget.controller.isOpen;
+    if (wasOpen == isOpen) return;
+    wasOpen = isOpen;
+    load();
+  }
+
+  void onSuggestionsChange() {
+    bool hasSuggestions = widget.controller.suggestions != null;
+    if (hadSuggestions == hasSuggestions) return;
+    hadSuggestions = hasSuggestions;
+    load();
   }
 
   /// Loads suggestions if not already loaded.
@@ -96,6 +104,7 @@ class _SuggestionsSearchState<T> extends State<SuggestionsSearch<T>> {
   /// Loads suggestions. Discards any previously loaded suggestions.
   Future<void> reload() async {
     if (!mounted) return;
+    if (!wasOpen) return;
 
     if (widget.controller.isLoading) {
       isQueued = true;
@@ -110,16 +119,16 @@ class _SuggestionsSearchState<T> extends State<SuggestionsSearch<T>> {
     Object? newError;
 
     try {
-      newSuggestions = (await widget.suggestionsCallback(search)).toList();
+      newSuggestions = (await widget.suggestionsCallback(search))?.toList();
     } on Exception catch (e) {
       newError = e;
     }
 
+    if (!mounted) return;
+
     widget.controller.suggestions = newSuggestions;
     widget.controller.error = newError;
     widget.controller.isLoading = false;
-
-    if (!mounted) return;
 
     if (isQueued) {
       isQueued = false;
@@ -137,13 +146,21 @@ class _SuggestionsSearchState<T> extends State<SuggestionsSearch<T>> {
         debounceDuration: widget.debounceDuration,
         onChanged: (value) {
           search = value;
-          reload();
+          widget.controller.refresh();
         },
         child: ConnectorWidget(
           value: widget.controller,
-          connect: (value) => value.addListener(onOpenChange),
-          disconnect: (value, key) => value.removeListener(onOpenChange),
-          child: widget.child,
+          connect: (value) => value.addListener(onChange),
+          disconnect: (value, key) => value.removeListener(onChange),
+          child: ConnectorWidget(
+            value: widget.controller,
+            connect: (value) => value.$refreshes.listen((_) {
+              hadSuggestions = false; // prevents double load
+              reload();
+            }),
+            disconnect: (value, key) => key?.cancel(),
+            child: widget.child,
+          ),
         ),
       ),
     );

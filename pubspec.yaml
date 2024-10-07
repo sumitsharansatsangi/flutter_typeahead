@@ -1,5 +1,5 @@
 name: flutter_typeahead
-version: 5.0.0
+version: 5.2.0
 publish_to: none
 
 description: A highly customizable typeahead (autocomplete) text input field for Flutter
